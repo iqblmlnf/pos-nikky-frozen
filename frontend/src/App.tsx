@@ -1,7 +1,7 @@
 // src/app/App.tsx
 
 import { useState } from "react";
-
+import UsersPage from "./pages/users/UserPage";
 import { Sidebar, Header } from "./components/layout";
 
 import { DashboardPage } from "./pages/dashboard/DashboardPage";
@@ -32,10 +32,14 @@ export default function App() {
       return <FinancePage />;
     case "pos":
       return <POSPage />;
+      case "users":
+        return <UsersPage />;
+
     default:
       return <DashboardPage />;
   }
 };
+   
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -49,9 +53,17 @@ export default function App() {
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header page={page} onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+        
+        <Header
+          page={page}
+          onMenuClick={() =>
+            setSidebarOpen(!sidebarOpen)
+          }
+        />
 
-        <main className="flex-1 overflow-y-auto">{renderPage()}</main>
+        <main className="flex-1 overflow-y-auto">
+          {renderPage()}
+        </main>
       </div>
     </div>
   );
