@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Sidebar, Header } from "./components/layout";
 
 import { DashboardPage } from "./pages/dashboard/DashboardPage";
+import { FinancePage } from "./pages/finance/FinancePage";
 
 import type { Page, Role } from "./types";
 
@@ -30,6 +31,8 @@ export default function App() {
     switch (page) {
       case "dashboard":
         return <DashboardPage />;
+      case "finance":
+        return <FinancePage />;
       default:
     }
   };
