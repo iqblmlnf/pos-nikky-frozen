@@ -1,21 +1,29 @@
 // src/app/App.tsx
 
 import { useState } from "react";
-import UsersPage from "./pages/users/UserPage";
+
 import { Sidebar, Header } from "./components/layout";
 
 import { DashboardPage } from "./pages/dashboard/DashboardPage";
-import { FinancePage } from "./pages/finance/FinancePage";
+import { ProductPage } from "./pages/products/ProductPage";
 import POSPage from "./pages/pos/POSPage";
+import ExpiryPage from "./pages/expiry/ExpiryPage";
+import StockPage from "./pages/stock/StockPage";
+import { FinancePage } from "./pages/finance/FinancePage";
+import UsersPage from "./pages/users/UserPage";
 
 import type { Page, Role } from "./types";
 
+
 export default function App() {
-  const [page, setPage] = useState<Page>("dashboard");
+  const [page, setPage] =
+    useState<Page>("dashboard");
 
-  const [role] = useState<Role>("owner");
+  const [role] =
+    useState<Role>("owner");
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] =
+    useState(false);
 
   const currentUser = {
     name: "Budi Santoso",
@@ -25,21 +33,25 @@ export default function App() {
   };
 
   const renderPage = () => {
-  switch (page) {
-    case "dashboard":
-      return <DashboardPage />;
-    case "finance":
-      return <FinancePage />;
-    case "pos":
-      return <POSPage />;
-      case "users":
+    switch (page) {
+      case "dashboard":
+        return <DashboardPage />;
+        case "products":
+        return <ProductPage />;
+        case "pos":
+        return <POSPage />;
+        case "expiry":
+        return <ExpiryPage />;
+        case "stock":
+        return <StockPage />;
+        case "finance":
+        return <FinancePage />;
+        case "users":
         return <UsersPage />;
-
-    default:
-      return <DashboardPage />;
-  }
-};
-   
+      default:
+        return <DashboardPage />;
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -48,7 +60,9 @@ export default function App() {
         onNavigate={setPage}
         role={role}
         isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        onClose={() =>
+          setSidebarOpen(false)
+        }
         currentUser={currentUser}
       />
 
