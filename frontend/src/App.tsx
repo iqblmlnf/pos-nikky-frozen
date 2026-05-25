@@ -6,19 +6,16 @@ import { Sidebar, Header } from "./components/layout";
 
 import { DashboardPage } from "./pages/dashboard/DashboardPage";
 import { FinancePage } from "./pages/finance/FinancePage";
+import POSPage from "./pages/pos/POSPage";
 
 import type { Page, Role } from "./types";
 
-
 export default function App() {
-  const [page, setPage] =
-    useState<Page>("dashboard");
+  const [page, setPage] = useState<Page>("dashboard");
 
-  const [role] =
-    useState<Role>("owner");
+  const [role] = useState<Role>("owner");
 
-  const [sidebarOpen, setSidebarOpen] =
-    useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const currentUser = {
     name: "Budi Santoso",
@@ -28,14 +25,17 @@ export default function App() {
   };
 
   const renderPage = () => {
-    switch (page) {
-      case "dashboard":
-        return <DashboardPage />;
-      case "finance":
-        return <FinancePage />;
-      default:
-    }
-  };
+  switch (page) {
+    case "dashboard":
+      return <DashboardPage />;
+    case "finance":
+      return <FinancePage />;
+    case "pos":
+      return <POSPage />;
+    default:
+      return <DashboardPage />;
+  }
+};
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -44,24 +44,14 @@ export default function App() {
         onNavigate={setPage}
         role={role}
         isOpen={sidebarOpen}
-        onClose={() =>
-          setSidebarOpen(false)
-        }
+        onClose={() => setSidebarOpen(false)}
         currentUser={currentUser}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        
-        <Header
-          page={page}
-          onMenuClick={() =>
-            setSidebarOpen(!sidebarOpen)
-          }
-        />
+        <Header page={page} onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-        <main className="flex-1 overflow-y-auto">
-          {renderPage()}
-        </main>
+        <main className="flex-1 overflow-y-auto">{renderPage()}</main>
       </div>
     </div>
   );
