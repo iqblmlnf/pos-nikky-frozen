@@ -4,15 +4,12 @@ import { useState } from "react";
 
 import { Sidebar, Header } from "./components/layout";
 
-
+import POSPage from "./pages/pos/POSPage";
 import { ProductPage } from "./pages/products/ProductPage";
-
 import ExpiryPage from "./pages/expiry/ExpiryPage";
 import StockPage from "./pages/stock/StockPage";
 
-
 import type { Page, Role } from "./types";
-
 
 export default function App() {
   const [page, setPage] =
@@ -33,17 +30,20 @@ export default function App() {
 
   const renderPage = () => {
     switch (page) {
-      
-        case "products":
+      case "pos":
+        return <POSPage />;
+
+      case "products":
         return <ProductPage />;
-        
-        case "expiry":
+
+      case "expiry":
         return <ExpiryPage />;
-        case "stock":
+
+      case "stock":
         return <StockPage />;
-        
+
       default:
-        
+        return null;
     }
   };
 
@@ -61,7 +61,6 @@ export default function App() {
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        
         <Header
           page={page}
           onMenuClick={() =>
