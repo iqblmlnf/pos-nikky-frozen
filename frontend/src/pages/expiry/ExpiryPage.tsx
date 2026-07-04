@@ -1,114 +1,90 @@
-import { useState } from "react"
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-import { PRODUCTS } from "../../data/products"
-
-import { daysFromNow } from "../../utils/date"
+import { daysFromNow } from "../../utils/date";
 
 import {
   ExpiryStats,
-  ExpiryToolbar,
-  ExpiryTable
-} from "../../components/expiry"
+  ExpiryAlertList,
+} from "../../components/expiry";
 
 export default function ExpiryPage() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("Semua");
 
-  const [search, setSearch] =
-    useState("")
+  const loadProducts = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:8000/api/products"
+      );
 
-  const [status, setStatus] =
-    useState("Semua")
+      setProducts(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  const filtered =
-    PRODUCTS.filter(product => {
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
-      const days =
-        daysFromNow(
-          product.expiry
-        )
+  const expired = products.filter(
+    (p) => daysFromNow(p.expiry) < 0
+  );
 
-      const matchesSearch =
+  const todayExp = products.filter(
+    (p) => daysFromNow(p.expiry) === 0
+  );
 
-        product.name
-          .toLowerCase()
-          .includes(search.toLowerCase())
+  const weekExp = products.filter((p) => {
+    const d = daysFromNow(p.expiry);
+    return d > 0 && d <= 7;
+  });
 
-      const matchesStatus =
+  const monthExp = products.filter((p) => {
+    const d = daysFromNow(p.expiry);
+    return d > 7 && d <= 30;
+  });
 
-        status === "Semua"
+  const allWarning = products
+    .filter((p) => daysFromNow(p.expiry) <= 30)
+    .sort(
+      (a, b) =>
+        daysFromNow(a.expiry) -
+        daysFromNow(b.expiry)
+    );
 
-        ||
+  const filtered = products.filter((product) => {
+    const days = daysFromNow(product.expiry);
 
-        (
-          status === "Expired" &&
-          days < 0
-        )
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
 
-        ||
-
-        (
-          status === "Hampir Expired" &&
-          days >= 0 &&
-          days <= 7
-        )
-
-        ||
-
-        (
-          status === "Aman" &&
-          days > 7
-        )
-
-      return (
-        matchesSearch &&
-        matchesStatus
-      )
-    })
-
-  const expiredCount =
-    PRODUCTS.filter(
-      p =>
-        daysFromNow(
-          p.expiry
-        ) < 0
-    ).length
-
-  const warningCount =
-    PRODUCTS.filter(p => {
-
-      const days =
-        daysFromNow(
-          p.expiry
-        )
-
-      return (
+    const matchesStatus =
+      status === "Semua" ||
+      (status === "Expired" && days < 0) ||
+      (status === "Hampir Expired" &&
         days >= 0 &&
-        days <= 7
-      )
-    }).length
+        days <= 7) ||
+      (status === "Aman" && days > 7);
+
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="p-4 lg:p-6 space-y-5">
-
-      {/* STATS */}
       <ExpiryStats
-        expiredCount={expiredCount}
-        warningCount={warningCount}
+        expired={expired.length}
+        today={todayExp.length}
+        week={weekExp.length}
+        month={monthExp.length}
       />
 
-      {/* TOOLBAR */}
-      <ExpiryToolbar
-        search={search}
-        setSearch={setSearch}
-
-        status={status}
-        setStatus={setStatus}
+      <ExpiryAlertList
+        products={allWarning}
       />
-
-      {/* TABLE */}
-      <ExpiryTable
-        products={filtered}
-      />
-
     </div>
-  )
+  );
 }
