@@ -1,50 +1,97 @@
-import { useState } from "react"
-
-import { USERS } from "../../data/users"
+import { useEffect, useState } from "react";
+import { api } from "../../lib/api";
+import Swal from "sweetalert2";
 
 import {
-
   UserStats,
   UserToolbar,
-  UserTable
-
-} from "../../components/users"
+  UserTable,
+  UserModal,
+} from "../../components/users";
 
 export default function UsersPage() {
+  const [users, setUsers] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const handleDelete = async (user: any) => {
+    const result = await Swal.fire({
+      title: "Hapus User?",
+      text: `User ${user.name} akan dihapus`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Hapus",
+      cancelButtonText: "Batal",
+    });
 
-  const [search, setSearch] =
-    useState("")
+    if (!result.isConfirmed) return;
 
-  const filtered = USERS.filter(user =>
+    await api.delete(`/users/${user.id}`);
 
-    user.name
-      .toLowerCase()
-      .includes(search.toLowerCase())
+    Swal.fire({
+      icon: "success",
+      title: "Berhasil",
+      text: "User berhasil dihapus",
+    });
 
-  )
+    loadUsers();
+  };
+  const loadUsers = async () => {
+    try {
+      const res = await api.get("/users");
 
-  const activeUsers =
-    USERS.filter(
-      u => u.status === "active"
-    ).length
+      setUsers(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const [search, setSearch] = useState("");
+
+  const filtered = users.filter((user: any) =>
+    user.name.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const activeUsers = users.length;
 
   return (
     <div className="p-4 lg:p-6 space-y-5">
-
-      <UserStats
-        total={USERS.length}
-        active={activeUsers}
-      />
+      <UserStats total={users.length} active={activeUsers} />
 
       <UserToolbar
         search={search}
         setSearch={setSearch}
+        onAdd={() => {
+          setEditing(null);
+          setShowModal(true);
+        }}
       />
 
       <UserTable
         users={filtered}
+        onEdit={(user) => {
+          setEditing(user);
+          setShowModal(true);
+        }}
+        onDelete={handleDelete}
       />
 
+      <UserModal
+        open={showModal}
+        editing={editing}
+        onClose={() => {
+          setShowModal(false);
+          setEditing(null);
+        }}
+        onSuccess={() => {
+          loadUsers();
+          setShowModal(false);
+          setEditing(null);
+        }}
+      />
     </div>
-  )
+  );
 }
