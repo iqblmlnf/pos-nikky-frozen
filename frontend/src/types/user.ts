@@ -1,18 +1,17 @@
-// src/types/user.ts
-
 import type { Role } from "./auth";
 
-export type UserStatus =
-  | "active"
-  | "inactive";
+export interface Branch {
+  id: number;
+  name: string;
+  address?: string;
+}
 
 export interface AppUser {
   id: number;
   name: string;
   email: string;
   role: Role;
-  branch: string;
-  status: UserStatus;
-  initials: string;
-  
+
+  branch_id?: number;
+  branch?: Branch;
 }
