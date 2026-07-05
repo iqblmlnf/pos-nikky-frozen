@@ -31,3 +31,11 @@ use App\Http\Controllers\Api\MidtransController;
 Route::apiResource('sales', SaleController::class);
 
 Route::post('/midtrans/create-transaction', [MidtransController::class, 'createTransaction']);
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\ExpenseController;
+
+
+Route::get('/audit-logs', [AuditLogController::class, 'index']);
+Route::apiResource('expenses', ExpenseController::class);
+
+
