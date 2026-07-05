@@ -21,3 +21,13 @@ Route::post('/stock-transfer', [TransferStockController::class, 'store']);
 Route::get('/stock-transfer', [TransferStockController::class, 'index']);
 Route::get('/stock-transfer-history', [TransferStockController::class, 'history']);
 
+
+use App\Http\Controllers\SaleController;
+
+use App\Http\Controllers\Api\MidtransController;
+
+
+
+Route::apiResource('sales', SaleController::class);
+
+Route::post('/midtrans/create-transaction', [MidtransController::class, 'createTransaction']);

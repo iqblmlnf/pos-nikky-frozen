@@ -4,7 +4,6 @@ import { Sidebar, Header } from "./components/layout";
 
 import { DashboardPage } from "./pages/dashboard/DashboardPage";
 import { ProductPage } from "./pages/products/ProductPage";
-import POSPage from "./pages/pos/POSPage";
 import ExpiryPage from "./pages/expiry/ExpiryPage";
 import StockPage from "./pages/stock/StockPage";
 import { FinancePage } from "./pages/finance/FinancePage";
@@ -108,3 +107,4 @@ export default function App() {
     </div>
   );
 }
+import POSPage from "./pages/pos/POSPage";
