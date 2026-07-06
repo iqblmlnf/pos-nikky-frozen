@@ -45,6 +45,13 @@ class AuthController extends Controller
             ], 403);
         }
 
+        AuditHelper::log(
+            $user->id,
+            'LOGIN',
+            'AUTH',
+            'Login ke sistem'
+        );
+
         return response()->json([
             'success' => true,
             'user' => [
@@ -157,6 +164,13 @@ class AuthController extends Controller
         DB::table('password_reset_tokens')
             ->where('email', $validated['email'])
             ->delete();
+
+        AuditHelper::log(
+            $user->id,
+            'RESET_PASSWORD',
+            'AUTH',
+            'Mengatur ulang password'
+        );
 
         return response()->json([
             'success' => true,

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\ProductStock;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Helpers\AuditHelper;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +28,17 @@ class ProductController extends Controller
         return $query->get();
     }
 
+    public function expiring()
+    {
+        return Product::query()
+            ->select('id', 'sku', 'name', 'image', 'expiry')
+            ->whereNotNull('expiry')
+            ->whereDate('expiry', '<=', now()->addDays(7))
+            ->orderBy('expiry')
+            ->limit(20)
+            ->get();
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -39,6 +51,8 @@ class ProductController extends Controller
             'sku.required' => 'SKU wajib diisi',
             'name.required' => 'Nama produk wajib diisi',
         ]);
+
+        $branchId = $this->resolveBranchId($request);
 
         $imagePath = null;
 
@@ -59,7 +73,7 @@ class ProductController extends Controller
 
         ProductStock::create([
             'product_id' => $product->id,
-            'branch_id' => $request->branch_id,
+            'branch_id' => $branchId,
             'stock' => $request->stock,
         ]);
 
@@ -80,6 +94,8 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        $branchId = $this->resolveBranchId($request);
+
         $imagePath = $product->image;
 
         if ($request->hasFile('image')) {
@@ -100,7 +116,7 @@ class ProductController extends Controller
         ProductStock::updateOrCreate(
             [
                 'product_id' => $product->id,
-                'branch_id' => $request->branch_id,
+                'branch_id' => $branchId,
             ],
             [
                 'stock' => $request->stock,
@@ -115,6 +131,24 @@ class ProductController extends Controller
         );
 
         return response()->json($product);
+    }
+
+
+    private function resolveBranchId(Request $request): int
+    {
+        $user = User::find($request->user_id);
+
+        if ($user?->role === 'admin_gudang') {
+            abort_if(
+                ! $user->branch_id,
+                422,
+                'Admin gudang belum memiliki cabang.'
+            );
+
+            return (int) $user->branch_id;
+        }
+
+        return (int) $request->branch_id;
     }
 
     public function destroy(Product $product)
@@ -138,3 +172,4 @@ class ProductController extends Controller
         ]);
     }
 }
+
