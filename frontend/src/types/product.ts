@@ -1,13 +1,20 @@
-// src/types/product.ts
-
 export interface Product {
   id: number;
   sku: string;
   name: string;
   category: string;
   price: number;
-  stock: number;
-  branch: string;
   expiry: string;
-  emoji: string;
+  image?: string;
+
+  stocks?: {
+    id: number;
+    stock: number;
+    branch_id: number;
+
+    branch?: {
+      id: number;
+      name: string;
+    };
+  }[];
 }
