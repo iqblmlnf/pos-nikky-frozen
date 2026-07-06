@@ -1,60 +1,47 @@
 import { Building2 } from "lucide-react";
-
 import { fmt } from "../../utils/currency";
 
-interface BranchData {
-  branch: string;
-  revenue: number;
-  pct: number;
-  trend: string;
-}
+export function BranchPerformanceCard({ branches }: any) {
+  if (!Array.isArray(branches)) {
+    return null;
+  }
 
-interface BranchPerformanceCardProps {
-  branches: BranchData[];
-}
+  const maxRevenue = Math.max(
+    ...branches.map((b: any) => Number(b.revenue)),
+    1,
+  );
 
-export function BranchPerformanceCard({
-  branches,
-}: BranchPerformanceCardProps) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-      <h3 className="font-bold text-gray-900 mb-5">
-        Performa Cabang
-      </h3>
+      <h3 className="font-bold text-gray-900 mb-5">Performa Cabang</h3>
 
       <div className="space-y-4">
-        {branches.map((branch) => (
-          <div key={branch.branch}>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Building2 className="w-3.5 h-3.5 text-gray-400" />
+        {branches.map((branch: any) => {
+          const pct = (Number(branch.revenue) / maxRevenue) * 100;
 
-                <span className="text-sm font-medium text-gray-700">
-                  {branch.branch}
-                </span>
+          return (
+            <div key={branch.id}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-gray-400" />
+
+                  <span>{branch.name}</span>
+                </div>
+
+                <span>{fmt(Number(branch.revenue))}</span>
               </div>
 
-              <div className="flex items-center gap-2.5">
-                <span className="text-sm font-bold text-gray-900">
-                  {fmt(branch.revenue)}
-                </span>
-
-                <span className="text-xs text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">
-                  {branch.trend}
-                </span>
+              <div className="w-full bg-gray-200 h-2 rounded">
+                <div
+                  className="bg-blue-600 h-2 rounded"
+                  style={{
+                    width: `${pct}%`,
+                  }}
+                />
               </div>
             </div>
-
-            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full"
-                style={{
-                  width: `${branch.pct}%`,
-                }}
-              />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

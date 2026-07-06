@@ -1,43 +1,51 @@
 import {
   AlertTriangle,
-  DollarSign,
   Package2,
+  DollarSign,
   ShoppingCart,
 } from "lucide-react";
 
 import { StatCard } from "../ui";
 
 interface DashboardStatsProps {
+  totalProducts: number;
   expiringCount: number;
   lowStockCount: number;
+  todayRevenue: number;
 }
 
 export function DashboardStats({
+  totalProducts,
   expiringCount,
   lowStockCount,
+  todayRevenue,
 }: DashboardStatsProps) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <StatCard
-        title="Revenue Hari Ini"
-        value="Rp 4,25 Jt"
-        sub="Sabtu, 15 Jan 2024"
-        icon={<DollarSign className="w-5 h-5" />}
+        title="Total Produk"
+        value={String(totalProducts)}
+        sub="Produk terdaftar"
+        icon={<Package2 className="w-5 h-5" />}
         color="blue"
         trend={{
-          label: "+15%",
+          label: "Aktif",
           up: true,
         }}
       />
 
       <StatCard
-        title="Transaksi Hari Ini"
-        value="85"
-        sub="dari 3 cabang"
-        icon={<ShoppingCart className="w-5 h-5" />}
-        color="cyan"
+        title="Pendapatan Hari Ini"
+        value={new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }).format(todayRevenue)}
+        sub="Penjualan hari ini"
+        icon={<DollarSign className="w-5 h-5" />}
+        color="green"
         trend={{
-          label: "+8%",
+          label: "Realtime",
           up: true,
         }}
       />
@@ -58,7 +66,7 @@ export function DashboardStats({
         title="Stok Menipis"
         value={String(lowStockCount)}
         sub="< 10 unit tersisa"
-        icon={<Package2 className="w-5 h-5" />}
+        icon={<ShoppingCart className="w-5 h-5" />}
         color="red"
         trend={{
           label: "Segera Restock",
@@ -68,3 +76,4 @@ export function DashboardStats({
     </div>
   );
 }
+  

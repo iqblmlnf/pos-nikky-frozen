@@ -4,15 +4,18 @@ import { Sidebar, Header } from "./components/layout";
 
 import { DashboardPage } from "./pages/dashboard/DashboardPage";
 import { ProductPage } from "./pages/products/ProductPage";
+import POSPage from "./pages/pos/POSPage";
 import ExpiryPage from "./pages/expiry/ExpiryPage";
 import StockPage from "./pages/stock/StockPage";
 import { FinancePage } from "./pages/finance/FinancePage";
 import UsersPage from "./pages/users/UserPage";
 import Login from "./pages/login/LoginPage";
+import TransactionPage from "./pages/transactions/TransactionPage";
 
 import type { Page, Role } from "./types";
 
 export default function App() {
+  // PERBAIKAN 1: Gunakan sessionStorage agar data otomatis terhapus saat sesi baru / browser direstart
   const [user, setUser] = useState(() => {
     return JSON.parse(sessionStorage.getItem("user") || "null");
   });
@@ -40,6 +43,7 @@ export default function App() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // PERBAIKAN 2: Ganti fungsi reload dengan update state dinamis agar login langsung mengarah ke halaman yang benar
   const handleLoginSuccess = () => {
     const updatedUser = JSON.parse(sessionStorage.getItem("user") || "null");
     if (updatedUser) {
@@ -48,6 +52,7 @@ export default function App() {
     }
   };
 
+  // Jika belum login, tampilkan halaman Login
   if (!user) {
     return <Login onLogin={handleLoginSuccess} />;
   }
@@ -71,18 +76,28 @@ export default function App() {
     switch (page) {
       case "dashboard":
         return <DashboardPage />;
-        case "products":
+
+      case "products":
         return <ProductPage />;
-        case "pos":
+
+      case "pos":
         return <POSPage />;
-        case "expiry":
+
+      case "expiry":
         return <ExpiryPage />;
-        case "stock":
+
+      case "stock":
         return <StockPage />;
-        case "finance":
+
+      case "finance":
         return <FinancePage />;
-        case "users":
+
+      case "users":
         return <UsersPage />;
+
+      case "transactions":
+        return <TransactionPage />;
+
       default:
         return <DashboardPage />;
     }
@@ -107,4 +122,3 @@ export default function App() {
     </div>
   );
 }
-import POSPage from "./pages/pos/POSPage";
