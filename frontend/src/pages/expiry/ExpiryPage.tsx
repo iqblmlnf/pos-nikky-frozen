@@ -1,114 +1,108 @@
-import { useState } from "react"
+import { useEffect, useState } from "react";
+import { api } from "../../lib/api";
 
-import { PRODUCTS } from "../../data/products"
-
-import { daysFromNow } from "../../utils/date"
+import { daysFromNow } from "../../utils/date";
 
 import {
   ExpiryStats,
-  ExpiryToolbar,
-  ExpiryTable
-} from "../../components/expiry"
+  ExpiryAlertList,
+} from "../../components/expiry";
 
 export default function ExpiryPage() {
+  // 1. Ambil data user yang sedang login dari sessionStorage
+  const user = JSON.parse(sessionStorage.getItem("user") || "{}");
 
-  const [search, setSearch] =
-    useState("")
+  const [products, setProducts] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("Semua");
 
-  const [status, setStatus] =
-    useState("Semua")
+  // 2. Modifikasi loadProducts agar mengirimkan params branch_id jika bukan owner
+  const loadProducts = async () => {
+    try {
+      const params =
+        user.role === "owner"
+          ? {}
+          : {
+              branch_id: user.branch_id,
+            };
 
-  const filtered =
-    PRODUCTS.filter(product => {
+      const res = await api.get("/products", {
+        params, // Kirim parameter ke backend Laravel bray
+      });
 
-      const days =
-        daysFromNow(
-          product.expiry
-        )
+      setProducts(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-      const matchesSearch =
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
-        product.name
-          .toLowerCase()
-          .includes(search.toLowerCase())
+  const expired = products.filter(
+    (p) => daysFromNow(p.expiry) < 0
+  );
 
-      const matchesStatus =
+  const todayExp = products.filter(
+    (p) => daysFromNow(p.expiry) === 0
+  );
 
-        status === "Semua"
+  const weekExp = products.filter((p) => {
+    const d = daysFromNow(p.expiry);
+    return d > 0 && d <= 7;
+  });
 
-        ||
+  const monthExp = products.filter((p) => {
+    const d = daysFromNow(p.expiry);
+    return d > 7 && d <= 30;
+  });
 
-        (
-          status === "Expired" &&
-          days < 0
-        )
+  const allWarning = products
+    .filter((p) => daysFromNow(p.expiry) <= 30)
+    .sort(
+      (a, b) =>
+        daysFromNow(a.expiry) -
+        daysFromNow(b.expiry)
+    );
 
-        ||
+  const filtered = products.filter((product) => {
+    const days = daysFromNow(product.expiry);
 
-        (
-          status === "Hampir Expired" &&
-          days >= 0 &&
-          days <= 7
-        )
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
 
-        ||
-
-        (
-          status === "Aman" &&
-          days > 7
-        )
-
-      return (
-        matchesSearch &&
-        matchesStatus
-      )
-    })
-
-  const expiredCount =
-    PRODUCTS.filter(
-      p =>
-        daysFromNow(
-          p.expiry
-        ) < 0
-    ).length
-
-  const warningCount =
-    PRODUCTS.filter(p => {
-
-      const days =
-        daysFromNow(
-          p.expiry
-        )
-
-      return (
+    const matchesStatus =
+      status === "Semua" ||
+      (status === "Expired" && days < 0) ||
+      (status === "Hampir Expired" &&
         days >= 0 &&
-        days <= 7
-      )
-    }).length
+        days <= 7) ||
+      (status === "Aman" && days > 7);
+
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="p-4 lg:p-6 space-y-5">
+      {/* Opsional: Penanda nama cabang di atas dashboard biar makin mantap */}
+      {user.role !== "owner" && user.branch?.name && (
+        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-xl text-sm font-semibold inline-block">
+          Cabang: {user.branch.name}
+        </div>
+      )}
 
-      {/* STATS */}
       <ExpiryStats
-        expiredCount={expiredCount}
-        warningCount={warningCount}
+        expired={expired.length}
+        today={todayExp.length}
+        week={weekExp.length}
+        month={monthExp.length}
       />
 
-      {/* TOOLBAR */}
-      <ExpiryToolbar
-        search={search}
-        setSearch={setSearch}
-
-        status={status}
-        setStatus={setStatus}
+      <ExpiryAlertList
+        products={allWarning}
       />
-
-      {/* TABLE */}
-      <ExpiryTable
-        products={filtered}
-      />
-
     </div>
-  )
+  );
 }

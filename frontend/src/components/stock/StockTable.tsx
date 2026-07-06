@@ -1,137 +1,167 @@
-import { fmt } from "../../utils/currency"
+import { storageUrl } from "../../lib/api";
+interface StockItem {
+  id: number;
+  stock: number;
 
-import StockStatusBadge from "./StockStatusBadge"
+  product: {
+    id: number;
+    name: string;
+    sku: string;
+    category: string;
+    price: number;
+    image: string;
+  };
 
-import type { Product } from "../../types/product"
+  branch: {
+    id: number;
+    name: string;
+  };
+}
 
 interface Props {
-  products: Product[]
+  stocks: StockItem[];
+  onEdit: (item: StockItem) => void;
 }
 
 export default function StockTable({
-  products
+  stocks,
+  onEdit,
 }: Props) {
+  const maxStock = Math.max(
+    ...stocks.map((s) => s.stock),
+    1,
+  );
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden">
-
-      <div className="overflow-x-auto">
-
-        <table className="w-full text-sm">
-
-          <thead>
-
-            <tr className="border-b border-gray-100 bg-gray-50">
-
-              {[
-                "Produk",
-                "Kategori",
-                "Harga",
-                "Stok",
-                "Cabang",
-                "Status"
-              ].map(header => (
-
-                <th
-                  key={header}
-                  className="px-4 py-3 text-left text-xs uppercase tracking-wider text-gray-400 font-bold whitespace-nowrap"
-                >
-                  {header}
-                </th>
-
-              ))}
-
-            </tr>
-
-          </thead>
-
-          <tbody className="divide-y divide-gray-50">
-
-            {products.map(product => (
-
-              <tr
-                key={product.id}
-                className="hover:bg-gray-50 transition-colors"
-              >
-
-                {/* PRODUCT */}
-                <td className="px-4 py-3">
-
-                  <div className="flex items-center gap-3">
-
-                    <div className="text-3xl">
-
-                      {product.emoji}
-
-                    </div>
-
-                    <div>
-
-                      <p className="font-bold text-gray-900">
-
-                        {product.name}
-
-                      </p>
-
-                      <p className="text-xs text-gray-400">
-
-                        {product.sku}
-
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                </td>
-
-                {/* CATEGORY */}
-                <td className="px-4 py-3 text-gray-500">
-
-                  {product.category}
-
-                </td>
-
-                {/* PRICE */}
-                <td className="px-4 py-3 font-semibold text-blue-600">
-
-                  {fmt(product.price)}
-
-                </td>
-
-                {/* STOCK */}
-                <td className="px-4 py-3 font-bold">
-
-                  {product.stock}
-
-                </td>
-
-                {/* BRANCH */}
-                <td className="px-4 py-3 text-gray-500">
-
-                  {product.branch}
-
-                </td>
-
-                {/* STATUS */}
-                <td className="px-4 py-3">
-
-                  <StockStatusBadge
-                    stock={product.stock}
-                  />
-
-                </td>
-
-              </tr>
-
-            ))}
-
-          </tbody>
-
-        </table>
-
+    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="p-4 border-b border-gray-100">
+        <h3 className="font-bold text-gray-900">
+          Level Stok Produk
+        </h3>
       </div>
 
+      <div className="divide-y divide-gray-50">
+        {stocks.map((item) => {
+          const pct = Math.round(
+            (item.stock / maxStock) * 100,
+          );
+
+          const isLow = item.stock <= 10;
+
+          return (
+            <div
+              key={item.id}
+              className="
+                flex
+                items-center
+                gap-4
+                px-4
+                py-4
+                hover:bg-gray-50
+                transition-colors
+              "
+            >
+              <img
+                src={
+                  item.product.image
+                    ? storageUrl(item.product.image)
+                    : "https://placehold.co/100x100"
+                }
+                alt={item.product.name}
+                className="
+                  w-12
+                  h-12
+                  rounded-xl
+                  object-cover
+                  border
+                  border-gray-100
+                "
+              />
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <p className="font-bold text-gray-900">
+                      {item.product.name}
+                    </p>
+
+                    <p className="text-xs text-gray-400">
+                      {item.branch?.name}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {isLow && (
+                      <span
+                        className="
+                          text-[10px]
+                          font-bold
+                          bg-red-50
+                          text-red-600
+                          px-2
+                          py-1
+                          rounded-lg
+                        "
+                      >
+                        MENIPIS
+                      </span>
+                    )}
+
+                    <span
+                      className={`font-bold ${
+                        isLow
+                          ? "text-red-600"
+                          : "text-gray-900"
+                      }`}
+                    >
+                      {item.stock}
+                    </span>
+
+                    <span className="text-xs text-gray-400">
+                      unit
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${
+                        isLow
+                          ? "bg-red-500"
+                          : "bg-gradient-to-r from-blue-600 to-cyan-500"
+                      }`}
+                      style={{
+                        width: `${pct}%`,
+                      }}
+                    />
+                  </div>
+
+                  <span className="text-xs text-gray-400 w-10 text-right">
+                    {pct}%
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => onEdit(item)}
+                className="
+                  px-3
+                  py-2
+                  rounded-xl
+                  bg-blue-600
+                  text-white
+                  text-xs
+                  font-semibold
+                  hover:bg-blue-700
+                "
+              >
+                Edit
+              </button>
+            </div>
+          );
+        })}
+      </div>
     </div>
-  )
+  );
 }

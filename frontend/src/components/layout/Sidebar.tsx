@@ -29,9 +29,12 @@ export function Sidebar({
   onClose,
   currentUser,
 }: SidebarProps) {
-  const visibleItems = NAV_ITEMS.filter((item) =>
-    item.roles.includes(role)
-  );
+  const handleLogout = () => {
+    sessionStorage.removeItem("user");
+    window.location.reload();
+  };
+
+  const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(role));
 
   return (
     <>
@@ -46,7 +49,7 @@ export function Sidebar({
         className={cn(
           "fixed top-0 left-0 h-full w-60 bg-white border-r border-gray-100 flex flex-col z-30 transition-transform duration-300 shadow-xl shadow-blue-900/5",
           "lg:translate-x-0 lg:static lg:z-auto lg:shadow-none",
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         {/* Logo */}
@@ -73,21 +76,19 @@ export function Sidebar({
                   "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left",
                   active
                     ? "bg-blue-600 text-white shadow-sm shadow-blue-300/50"
-                    : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"
+                    : "text-gray-600 hover:bg-blue-50 hover:text-blue-700",
                 )}
               >
                 <span
                   className={cn(
                     "flex-shrink-0",
-                    active ? "text-white" : "text-gray-400"
+                    active ? "text-white" : "text-gray-400",
                   )}
                 >
                   <Icon className="w-4 h-4" />
                 </span>
 
-                <span className="flex-1">
-                  {item.label}
-                </span>
+                <span className="flex-1">{item.label}</span>
 
                 {item.badge && (
                   <span
@@ -95,7 +96,7 @@ export function Sidebar({
                       "text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center",
                       active
                         ? "bg-white/25 text-white"
-                        : "bg-red-500 text-white"
+                        : "bg-red-500 text-white",
                     )}
                   >
                     {item.badge}
@@ -109,10 +110,7 @@ export function Sidebar({
         {/* User Profile */}
         <div className="p-3 border-t border-gray-100">
           <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
-            <Avatar
-              initials={currentUser.initials}
-              size="sm"
-            />
+            <Avatar initials={currentUser.initials} size="sm" />
 
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-900 truncate">
@@ -124,7 +122,11 @@ export function Sidebar({
               </p>
             </div>
 
-            <button className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+            <button
+              onClick={handleLogout}
+              title="Logout"
+              className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+            >
               <LogOut className="w-3.5 h-3.5" />
             </button>
           </div>
