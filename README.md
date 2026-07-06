@@ -157,9 +157,7 @@ MIDTRANS_IS_PRODUCTION=false
 
 ## 👨‍💻 Developer
 
-Dikembangkan sebagai Project UTS Pemrograman.
-
-Nama: Iqbal Maulana
+Dikembangkan oleh team demon.
 
 Universitas: UNIVERSITAS AMIKOM YOGYAKARTA
 
