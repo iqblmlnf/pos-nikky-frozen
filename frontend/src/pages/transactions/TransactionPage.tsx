@@ -3,6 +3,7 @@ import { api } from "../../lib/api";
 import { Eye, Printer, Search, X } from "lucide-react";
 import { generateReceiptPDF } from "../../utils/receiptPdf";
 import { Download } from "lucide-react";
+import { exportToExcel } from "../../utils/exportExcel";
 
 export default function TransactionPage() {
   const [sales, setSales] = useState<any[]>([]);
@@ -65,6 +66,7 @@ export default function TransactionPage() {
       Tanggal: new Date(sale.created_at).toLocaleString("id-ID"),
     }));
 
+    exportToExcel(excelData, "Laporan_Transaksi");
   };
 
   useEffect(() => {

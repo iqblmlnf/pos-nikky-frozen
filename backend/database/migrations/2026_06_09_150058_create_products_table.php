@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             $table->dropForeign(['branch_id']);
-            $table->dropColumn('branch_id'); 
+            $table->dropColumn('branch_id');
         });
     }
 
