@@ -9,8 +9,13 @@ import Swal from "sweetalert2";
 import type { Product } from "../../types/product";
 
 export function ProductPage() {
+  const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+  const isOwner = user.role === "owner";
+
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Semua");
+  const [sortBy, setSortBy] = useState("default");
+  const [stockFilter, setStockFilter] = useState("all");
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -62,13 +67,13 @@ export function ProductPage() {
       });
 
       loadProducts();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
 
       Swal.fire({
         icon: "error",
-        title: "Gagal",
-        text: "Produk gagal dihapus",
+        title: "Gagal Menghapus",
+        text: error?.response?.data?.message || "Produk gagal dihapus",
       });
     }
   };
@@ -78,12 +83,44 @@ export function ProductPage() {
     ...Array.from(new Set(products.map((p) => p.category))),
   ];
 
-  const filtered = products.filter(
-    (p) =>
-      (category === "Semua" || p.category === category) &&
-      (p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.sku.toLowerCase().includes(search.toLowerCase())),
-  );
+  const filtered = products.filter((p) => {
+    const matchesCategory = category === "Semua" || p.category === category;
+    const matchesSearch =
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.sku.toLowerCase().includes(search.toLowerCase());
+
+    const totalStock =
+      p.stocks?.reduce((sum: number, s: any) => sum + Number(s.stock), 0) || 0;
+
+    let matchesStock = true;
+    if (stockFilter === "low") {
+      matchesStock = totalStock <= 10 && totalStock > 0;
+    } else if (stockFilter === "empty") {
+      matchesStock = totalStock === 0;
+    }
+
+    return matchesCategory && matchesSearch && matchesStock;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === "price_desc") {
+      return Number(b.price) - Number(a.price);
+    }
+    if (sortBy === "price_asc") {
+      return Number(a.price) - Number(b.price);
+    }
+    if (sortBy === "stock_desc") {
+      const stockA = a.stocks?.reduce((sum: number, s: any) => sum + Number(s.stock), 0) || 0;
+      const stockB = b.stocks?.reduce((sum: number, s: any) => sum + Number(s.stock), 0) || 0;
+      return stockB - stockA;
+    }
+    if (sortBy === "stock_asc") {
+      const stockA = a.stocks?.reduce((sum: number, s: any) => sum + Number(s.stock), 0) || 0;
+      const stockB = b.stocks?.reduce((sum: number, s: any) => sum + Number(s.stock), 0) || 0;
+      return stockA - stockB;
+    }
+    return a.name.localeCompare(b.name);
+  });
 
   return (
     <div className="p-4 lg:p-6 space-y-5">
@@ -95,6 +132,15 @@ export function ProductPage() {
           Kelola produk, stok, kategori, dan distribusi antar cabang
         </p>
       </div>
+
+      {isOwner && (
+        <div className="bg-blue-50/80 border border-blue-100 text-blue-800 px-5 py-3.5 rounded-2xl text-sm flex items-center gap-3 shadow-sm">
+          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">ℹ</span>
+          <p className="font-medium">
+            Anda masuk sebagai <strong>Owner</strong>. Halaman ini bersifat <strong>Lihat-Saja (Read-Only)</strong>. Tombol aksi tambah, edit, dan hapus dinonaktifkan.
+          </p>
+        </div>
+      )}
 
       {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -156,6 +202,10 @@ export function ProductPage() {
         category={category}
         setCategory={setCategory}
         categories={categories}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        stockFilter={stockFilter}
+        setStockFilter={setStockFilter}
         onAdd={() => {
           setEditing(null);
           setShowModal(true);
@@ -164,7 +214,7 @@ export function ProductPage() {
 
       {/* TABLE */}
       <ProductTable
-        products={filtered}
+        products={sorted}
         onEdit={(product) => {
           setEditing(product);
           setShowModal(true);
