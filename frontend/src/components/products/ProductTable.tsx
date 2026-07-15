@@ -4,11 +4,12 @@ import type { Product } from "../../types";
 
 interface Props {
   products: Product[];
+  isOwner?: boolean;
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
 }
 
-export default function ProductTable({ products, onEdit, onDelete }: Props) {
+export default function ProductTable({ products, isOwner, onEdit, onDelete }: Props) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
@@ -40,6 +41,7 @@ export default function ProductTable({ products, onEdit, onDelete }: Props) {
               <ProductRow
                 key={product.id}
                 product={product}
+                isOwner={isOwner}
                 onEdit={onEdit}
                 onDelete={onDelete}
               />

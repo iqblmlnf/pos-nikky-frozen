@@ -215,6 +215,7 @@ export function ProductPage() {
       {/* TABLE */}
       <ProductTable
         products={sorted}
+        isOwner={isOwner}
         onEdit={(product) => {
           setEditing(product);
           setShowModal(true);
