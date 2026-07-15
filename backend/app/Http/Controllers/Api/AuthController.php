@@ -19,7 +19,6 @@ class AuthController extends Controller
         $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
-            'role' => 'required|in:owner,kasir,admin_gudang,admin_keuangan',
         ]);
 
         $credentials = [
@@ -36,15 +35,6 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
-        if ($user->role !== $validated['role']) {
-            Auth::logout();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Role login tidak sesuai dengan akun ini',
-            ], 403);
-        }
-
         AuditHelper::log(
             $user->id,
             'LOGIN',
@@ -52,13 +42,19 @@ class AuthController extends Controller
             'Login ke sistem'
         );
 
+        $userWithBranch = User::with('branch')->find($user->id);
+
         return response()->json([
             'success' => true,
             'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'role' => $user->role,
-                'branch_id' => $user->branch_id,
+                'id' => $userWithBranch->id,
+                'name' => $userWithBranch->name,
+                'role' => $userWithBranch->role,
+                'branch_id' => $userWithBranch->branch_id,
+                'branch' => $userWithBranch->branch ? [
+                    'id' => $userWithBranch->branch->id,
+                    'name' => $userWithBranch->branch->name,
+                ] : null,
             ],
         ]);
     }
